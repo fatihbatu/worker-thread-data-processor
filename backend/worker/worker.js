@@ -1,6 +1,6 @@
 const { parentPort, workerData } = require("worker_threads");
 const mongoose = require("mongoose");
-const Movie = require("./model/movie"); // Adjust the path as necessary
+const Movie = require("../model/movie"); // Adjust the path as necessary
 
 mongoose.connect("mongodb://localhost:27017/netflix");
 
