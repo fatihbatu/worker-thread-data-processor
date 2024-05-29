@@ -2,11 +2,25 @@ const express = require("express");
 const router = express.Router();
 const { Worker, isMainThread } = require("worker_threads");
 const path = require("path");
+const Movie = require("../model/movie");
 
 router.post("/", async function (req, res, next) {
   try {
+    const moviesData = await Movie.find({
+      type: "Movie",
+      duration: { $ne: null },
+      country: { $ne: null },
+    });
+
+    // generate chunks of data to be processed by workers
+    const numWorkers = 1;
+    const chunkSize = Math.ceil(moviesData.length / numWorkers);
+    const chunks = [];
+    for (let i = 0; i < moviesData.length; i += chunkSize) {
+      chunks.push(moviesData.slice(i, i + chunkSize));
+    }
+
     if (isMainThread) {
-      const numWorkers = 3;
       const workers = [];
       const countryAverages = {};
       let workersCompleted = 0;
@@ -14,7 +28,7 @@ router.post("/", async function (req, res, next) {
       for (let i = 0; i < numWorkers; i++) {
         workers.push(
           new Worker(path.resolve(__dirname, "../worker.js"), {
-            workerData: { start: i, numWorkers },
+            workerData: { movies: JSON.stringify(chunks[i]) },
           })
         );
       }

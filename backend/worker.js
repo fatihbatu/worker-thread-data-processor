@@ -6,28 +6,20 @@ mongoose.connect("mongodb://localhost:27017/netflix");
 
 const processMovies = async () => {
   try {
-    const movies = await Movie.find({
-      type: "Movie",
-      duration: { $ne: null },
-      country: { $ne: null },
-    });
+    const movies = JSON.parse(workerData.movies);
     const countryDurations = {};
     const countryCounts = {};
-    let countryData;
-    for (
-      let i = workerData.start;
-      i < movies.length;
-      i += workerData.numWorkers
-    ) {
-      let { country, duration } = movies[i];
+    let countries;
+    movies.forEach((movie) => {
+      let { country, duration } = movie;
       if (country.includes(",")) {
-        countryData = country.split(", ");
+        countries = country.split(", ");
       } else {
-        countryData = [country];
+        countries = [country];
       }
-      if (countryData.length > 0 && duration) {
+      if (countries.length > 0 && duration) {
         const durationMinutes = parseInt(duration.split(" ")[0], 10);
-        countryData.forEach((country) => {
+        countries.forEach((country) => {
           if (!isNaN(durationMinutes)) {
             countryDurations[country] =
               (countryDurations[country] || 0) + durationMinutes;
@@ -35,10 +27,10 @@ const processMovies = async () => {
           }
         });
       }
-    }
+    });
     const countryAverages = {};
 
-    countryData.forEach((country) => {
+    countries.forEach((country) => {
       Object.keys(countryDurations).forEach((country) => {
         countryAverages[country] = {
           sum: countryDurations[country],
