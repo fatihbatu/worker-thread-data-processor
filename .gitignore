@@ -1,0 +1,30 @@
+# Node.js
+/backend/node_modules/
+/backend/npm-debug.log
+/backend/.npmrc
+/backend/.env
+/backend/.next/
+
+# React.js
+/frontend/node_modules/
+/frontend/npm-debug.log
+/frontend/.npmrc
+/frontend/.env
+/frontend/build/
+
+# IDEs and editors
+/.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
