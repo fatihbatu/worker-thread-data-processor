@@ -2,10 +2,10 @@ const { parentPort, workerData } = require("worker_threads");
 const mongoose = require("mongoose");
 const Movie = require("../model/movie"); // Adjust the path as necessary
 
-const processMovies = async () => {
+const processSeries = async () => {
   try {
-    const movies = JSON.parse(workerData.movies);
-    const countryDurations = {};
+    const movies = JSON.parse(workerData.series);
+    const countrySessions = {};
     const countryCounts = {};
     let countries;
     movies.forEach((movie) => {
@@ -16,11 +16,11 @@ const processMovies = async () => {
         countries = [country];
       }
       if (countries.length > 0 && duration) {
-        const durationMinutes = parseInt(duration.split(" ")[0], 10);
+        const sessionCount = parseInt(duration.split(" ")[0], 10);
         countries.forEach((country) => {
-          if (!isNaN(durationMinutes)) {
-            countryDurations[country] =
-              (countryDurations[country] || 0) + durationMinutes;
+          if (!isNaN(sessionCount)) {
+            countrySessions[country] =
+              (countrySessions[country] || 0) + sessionCount;
             countryCounts[country] = (countryCounts[country] || 0) + 1;
           }
         });
@@ -29,9 +29,9 @@ const processMovies = async () => {
     const countryAverages = {};
 
     countries.forEach((country) => {
-      Object.keys(countryDurations).forEach((country) => {
+      Object.keys(countrySessions).forEach((country) => {
         countryAverages[country] = {
-          sum: countryDurations[country],
+          sum: countrySessions[country],
           count: countryCounts[country],
         };
       });
@@ -45,4 +45,4 @@ const processMovies = async () => {
   }
 };
 
-processMovies();
+processSeries();

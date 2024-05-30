@@ -8,23 +8,23 @@ const { count } = require("console");
 router.post("/", async function (req, res, next) {
   const start = performance.now();
   try {
-    let moviesData = await Movie.find({
-      type: "Movie",
+    let seriesData = await Movie.find({
+      type: "TV Show",
       duration: { $ne: null },
       country: { $ne: null },
     });
 
     // for (let i = 0; i < 5; i++) {
-    //   moviesData = [...moviesData, ...moviesData];
-    //   console.log("End of loop", i, moviesData.length);
+    //   seriesData = [...seriesData, ...seriesData];
+    //   console.log("End of loop", i, seriesData.length);
     // }
 
     // generate chunks of data to be processed by workers
     const numWorkers = 4;
-    const chunkSize = Math.ceil(moviesData.length / numWorkers);
+    const chunkSize = Math.ceil(seriesData.length / numWorkers);
     const chunks = [];
-    for (let i = 0; i < moviesData.length; i += chunkSize) {
-      chunks.push(moviesData.slice(i, i + chunkSize));
+    for (let i = 0; i < seriesData.length; i += chunkSize) {
+      chunks.push(seriesData.slice(i, i + chunkSize));
     }
 
     if (isMainThread) {
@@ -34,8 +34,8 @@ router.post("/", async function (req, res, next) {
 
       for (let i = 0; i < numWorkers; i++) {
         workers.push(
-          new Worker(path.resolve(__dirname, "../worker/worker.js"), {
-            workerData: { movies: JSON.stringify(chunks[i]) },
+          new Worker(path.resolve(__dirname, "../worker/series-worker.js"), {
+            workerData: { series: JSON.stringify(chunks[i]) },
           })
         );
       }
@@ -46,14 +46,14 @@ router.post("/", async function (req, res, next) {
             `Worker ${worker.threadId} finished with message:`,
             message
           );
-          Object.entries(message).forEach(([country, avgDuration]) => {
+          Object.entries(message).forEach(([country, avgSessions]) => {
             if (countryAverages[country]) {
-              countryAverages[country].sum += avgDuration.sum;
-              countryAverages[country].count += avgDuration.count;
+              countryAverages[country].sum += avgSessions.sum;
+              countryAverages[country].count += avgSessions.count;
             } else {
               countryAverages[country] = {
-                sum: avgDuration.sum,
-                count: avgDuration.count,
+                sum: avgSessions.sum,
+                count: avgSessions.count,
               };
             }
           });
@@ -76,7 +76,7 @@ router.post("/", async function (req, res, next) {
               error: null,
               data: {
                 responseTime: `${Math.floor(end - start)} ms`,
-                count: moviesData.length,
+                count: seriesData.length,
                 countries: sortedAverages,
               },
             });

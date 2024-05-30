@@ -5,6 +5,7 @@ const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const mongoose = require("mongoose");
 const PORT = process.env.PORT || 3000;
+const start = performance.now();
 
 // Cross Origin Resource Sharing
 app.use(
@@ -26,7 +27,8 @@ app.use(cookieParser());
 app.use("/", express.static(path.join(__dirname, "/public")));
 
 // routes
-app.use("/api", require("./routes/root.js"));
+app.use("/movies", require("./routes/root.js"));
+app.use("/series", require("./routes/series.js"));
 
 app.all("*", (req, res) => {
   res.status(404);
